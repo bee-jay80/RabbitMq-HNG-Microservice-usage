@@ -1,392 +1,49 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Microservice Integration Dashboard</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
-    <style>
-        /* Chosen Palette: Warm Neutral & Subtle Blue (Slate and Sky) */
-        .chart-container {
-            position: relative;
-            width: 100%;
-            max-width: 800px;
-            margin-left: auto;
-            margin-right: auto;
-            height: 300px; /* Base height */
-            max-height: 400px;
-        }
-        @media (min-width: 768px) {
-            .chart-container {
-                height: 350px;
-            }
-        }
-        .code-block {
-            background-color: #1e293b; /* Slate-800 */
-            color: #f8fafc; /* Slate-50 */
-            border-radius: 0.5rem;
-            padding: 1rem;
-            overflow-x: auto;
-            font-family: monospace;
-            white-space: pre-wrap;
-            word-break: break-word;
-        }
-    </style>
-    </head>
-<body class="bg-gray-100 text-gray-800 min-h-screen">
-    <header class="bg-white shadow-md sticky top-0 z-10">
-        <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
-            <h1 class="text-3xl font-extrabold text-sky-800 tracking-tight">Microservices Integration Dashboard</h1>
-            <p class="text-sm text-gray-500 mt-1">Contract-First Development & Asynchronous Communication Guide</p>
-        </div>
-    </header>
+    <title>Generate FCM Token</title>
+</head>
+<body>
+    <h2>Generate Firebase FCM Token</h2>
+    <button onclick="getToken()">Generate Token</button>
 
-    <main class="max-w-7xl mx-auto py-8 sm:px-6 lg:px-8">
-        
-        <section id="service-explorer" class="bg-white p-6 rounded-lg shadow-xl mb-8">
-            <h2 class="text-2xl font-semibold text-gray-700 mb-4 border-b pb-2">Service Explorer: Define Your Role</h2>
-            <p class="text-gray-600 mb-6">Select your team's microservice below to view its primary responsibility, dependencies, and communication methods. This isolates the Single Responsibility Principle (SRP) for focused development.</m>
+    <p><strong>FCM Token:</strong></p>
+    <textarea id="tokenBox" rows="10" cols="70"></textarea>
 
-            <div id="service-selection" class="grid grid-cols-2 md:grid-cols-5 gap-4">
-                <button data-service="gateway" class="service-btn bg-sky-600 text-white p-3 rounded-lg shadow-md hover:bg-sky-700 transition duration-150 transform hover:scale-105 font-medium">API Gateway</button>
-                <button data-service="user" class="service-btn bg-gray-200 text-gray-700 p-3 rounded-lg shadow-md hover:bg-sky-100 transition duration-150 font-medium">User Service</button>
-                <button data-service="email" class="service-btn bg-gray-200 text-gray-700 p-3 rounded-lg shadow-md hover:bg-sky-100 transition duration-150 font-medium">Email Service</button>
-                <button data-service="push" class="service-btn bg-gray-200 text-gray-700 p-3 rounded-lg shadow-md hover:bg-sky-100 transition duration-150 font-medium">Push Service</button>
-                <button data-service="template" class="service-btn bg-gray-200 text-gray-700 p-3 rounded-lg shadow-md hover:bg-sky-100 transition duration-150 font-medium">Template Service</button>
-            </div>
-
-            <div id="service-details" class="mt-6 p-4 border border-gray-200 rounded-lg bg-gray-50 grid md:grid-cols-3 gap-4">
-                <div class="md:col-span-2">
-                    <h3 id="detail-name" class="text-xl font-bold text-sky-700 mb-2">API Gateway</h3>
-                    <p id="detail-role" class="text-gray-700 mb-3">Ingress & Orchestration. Validates incoming requests, handles authentication, retrieves user data, and publishes the structured notification message to the queue.</p>
-                    <div class="mt-4">
-                        <h4 class="font-semibold text-gray-600">Key Responsibilities:</h4>
-                        <ul id="detail-actions" class="list-disc list-inside ml-2 text-sm text-gray-600">
-                            <li>Calls User Service (Sync).</li>
-                            <li>Publishes message to RabbitMQ (Async).</li>
-                        </ul>
-                    </div>
-                </div>
-                <div class="border-l pl-4">
-                    <h4 class="font-semibold text-gray-600 mb-2">Communication Flow:</h4>
-                    <div id="detail-io" class="text-sm text-gray-700 space-y-2">
-                        <p><span class="font-medium text-sky-600">Input:</span> Synchronous REST requests from clients.</p>
-                        <p><span class="font-medium text-sky-600">Output:</span> JSON user profile (Sync); Message to RabbitMQ (Async).</p>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <section id="contract-viewer" class="grid md:grid-cols-5 gap-6">
-            
-            <div class="md:col-span-2 bg-white p-6 rounded-lg shadow-xl">
-                <h2 class="text-2xl font-semibold text-gray-700 mb-4 border-b pb-2">RabbitMQ Contract & Flow</h2>
-                <p class="text-gray-600 mb-4 text-sm">This panel details the specific broker targets. The shared setup uses the **notifications.direct** exchange for all publishing.</p>
-
-                <div class="space-y-4">
-                    <div class="p-3 bg-slate-100 rounded-lg">
-                        <p class="font-medium text-slate-700">Exchange (Target for Gateway)</p>
-                        <p class="font-bold text-lg text-slate-800">notifications.direct</p>
-                    </div>
-                    <div class="p-3 bg-green-50 rounded-lg">
-                        <p class="font-medium text-green-700">Email Routing Key (API Gateway uses)</p>
-                        <p class="font-bold text-lg text-green-800">notify.email</p>
-                    </div>
-                    <div class="p-3 bg-blue-50 rounded-lg">
-                        <p class="font-medium text-blue-700">Push Routing Key (API Gateway uses)</p>
-                        <p class="font-bold text-lg text-blue-800">notify.push</p>
-                    </div>
-                    <div class="p-3 bg-red-50 rounded-lg">
-                        <p class="font-medium text-red-700">Dead Letter Queue (Resilience NFR)</p>
-                        <p class="font-bold text-lg text-red-800">failed.queue</p>
-                    </div>
-                </div>
-
-                <div class="mt-6">
-                    <h3 class="text-lg font-semibold text-gray-700 mb-2">Message Flow Diagram</h3>
-                    <div class="bg-gray-100 p-3 rounded-lg text-sm text-gray-800">
-                        <p class="font-bold">Gateway ➡️ notifications.direct ➡️ Routing Key</p>
-                        <p class="pl-4">|-- notify.email ➡️ email.queue ➡️ Email Service</p>
-                        <p class="pl-4">|-- notify.push ➡️ push.queue ➡️ Push Service</p>
-                        <p class="pl-4">|-- (Failure) ➡️ notifications.dlx ➡️ failed.queue</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="md:col-span-3 bg-white p-6 rounded-lg shadow-xl">
-                <h2 class="text-2xl font-semibold text-gray-700 mb-4 border-b pb-2">Code Implementation: <span id="code-target">Publisher Logic</span></h2>
-                <p id="code-intro" class="text-gray-600 mb-4 text-sm">The Gateway must implement this logic to publish the message using the correct exchange and routing keys defined in the contract.</p>
-
-                <div class="flex space-x-2 mb-4">
-                    <button data-lang="python" id="lang-python" class="lang-btn bg-sky-600 text-white px-4 py-2 rounded-lg font-medium">Python (Pika)</button>
-                    <button data-lang="nodejs" id="lang-nodejs" class="lang-btn bg-gray-200 text-gray-700 px-4 py-2 rounded-lg font-medium">Node.js (amqplib)</button>
-                </div>
-                
-                <div id="code-container" class="code-block h-96 max-h-[50vh]">
-                    </div>
-
-                <div id="consumer-logic-note" class="hidden mt-4 p-3 bg-yellow-50 border-l-4 border-yellow-400 text-sm text-yellow-700 rounded-lg">
-                    <p class="font-semibold">Consumer Critical Logic:</p>
-                    <p>Remember to implement **Idempotency Checks** and use **`basic_ack`** on success or **`basic_reject/nack`** (with requeue) on failure to ensure message integrity and utilize the DLQ for permanent failures.</p>
-                </div>
-            </div>
-        </section>
-
-        <section class="mt-8 hidden">
-            <h2 class="text-2xl font-semibold text-gray-700 mb-4">Message Throughput and Latency</h2>
-            <div class="bg-white p-6 rounded-lg shadow-xl">
-                <p>Simulated Metrics: This chart would dynamically show historical throughput and latency based on simulated data or live status updates.</p>
-                <div class="chart-container h-80 max-h-96 w-full mx-auto">
-                    <canvas id="throughputChart"></canvas>
-                </div>
-            </div>
-        </section>
-
-    </main>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging-compat.js"></script>
 
     <script>
-        const SERVICES = {
-            gateway: {
-                name: "API Gateway",
-                role: "Ingress & Orchestration. Validates incoming requests, handles authentication, retrieves user data, and publishes the structured notification message to the queue.",
-                actions: ["Calls User Service (Sync).", "Publishes message to RabbitMQ (Async)."],
-                input: "Synchronous REST requests from clients.",
-                output: "JSON user profile (Sync); Message to RabbitMQ (Async).",
-                type: "publisher"
-            },
-            user: {
-                name: "User Service",
-                role: "User Data Source. Owns and serves user profile data, including contact details and notification preferences.",
-                actions: ["CRUD user data.", "Authenticates/Authorizes other services.", "Provides REST endpoints."],
-                input: "GET request with {user_id} (Sync).",
-                output: "JSON user profile (Sync).",
-                type: "rest"
-            },
-            email: {
-                name: "Email Service",
-                role: "Email Delivery. Consumes messages from the queue, fetches the email template, renders the final email content, and sends it via an external email provider (e.g., SendGrid).",
-                actions: ["Consumes messages from email.queue.", "Calls Template Service (Sync).", "Sends email (External)."],
-                input: "Asynchronous message contract from RabbitMQ.",
-                output: "Status Update to shared store (Sync).",
-                type: "consumer"
-            },
-            push: {
-                name: "Push Service",
-                role: "Mobile Delivery. Consumes messages from the queue, fetches the push notification template, and sends the payload to an external push provider (e.g., Firebase Cloud Messaging).",
-                actions: ["Consumes messages from push.queue.", "Calls Template Service (Sync).", "Sends push notification (External)."],
-                input: "Asynchronous message contract from RabbitMQ.",
-                output: "Status Update to shared store (Sync).",
-                type: "consumer"
-            },
-            template: {
-                name: "Template Service",
-                role: "Content Management. Stores, manages, and serves the pre-defined notification templates (HTML body, subject line, etc.).",
-                actions: ["CRUD templates with version history.", "Endpoint to render a template with payload."],
-                input: "GET request with {template_key}.",
-                output: "JSON template contract (Sync).",
-                type: "rest"
-            }
+        // Your Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyAvu7XOTcoexHqS9o11uTfQRPyMjJE_z8U",
+            authDomain: "push-service-184a8.firebaseapp.com",
+            projectId: "push-service-184a8",
+            storageBucket: "push-service-184a8.firebasestorage.app",
+            messagingSenderId: "1096856520461",
+            appId: "1:1096856520461:web:dd1d3fb6c3ea018e3a5244"
         };
 
-        const CODE_SAMPLES = {
-            python: {
-                publisher: `import pika, os, json
-RABBITMQ_URL = os.getenv("RABBITMQ_URL")
-EXCHANGE_NAME = "notifications.direct"
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const messaging = firebase.messaging();
 
-def publish_notification(data):
-    connection = pika.BlockingConnection(pika.URLParameters(RABBITMQ_URL))
-    channel = connection.channel()
-    routing_key = f"notify.{data['channel']}"
-    
-    channel.basic_publish(
-        exchange=EXCHANGE_NAME,
-        routing_key=routing_key,
-        body=json.dumps(data),
-        properties=pika.BasicProperties(delivery_mode=2)
-    )
-    connection.close()
-    return True`,
-                consumer: `import pika, os, json
-
-def process_message(ch, method, properties, body):
-    message = json.loads(body.decode())
-    # 1. Idempotency Check
-    
-    try:
-        # 2. Business Logic (Template Fetch, Send Provider Call)
-        print(f"Processing {message['event_id']}")
-        
-        # 3. ACK on Success
-        ch.basic_ack(delivery_tag=method.delivery_tag)
-
-    except Exception as e:
-        # 4. REJECT on Failure (triggers retry/DLQ)
-        ch.basic_reject(delivery_tag=method.delivery_tag, requeue=True)
-        # Implement Circuit Breaker logic here
-
-def start_consumer():
-    connection = pika.BlockingConnection(pika.URLParameters(os.getenv("RABBITMQ_URL")))
-    channel = connection.channel()
-    channel.basic_qos(prefetch_count=1)
-    
-    queue_name = "email.queue" # OR push.queue
-    
-    channel.basic_consume(
-        queue=queue_name, 
-        on_message_callback=process_message,
-        auto_ack=False
-    )
-    channel.start_consuming()`,
-                rest: "REST service does not use RabbitMQ. It exposes synchronous GET/POST endpoints consumed by the Gateway or Workers."
-            },
-            nodejs: {
-                publisher: `const amqp = require('amqplib');
-const RABBITMQ_URL = process.env.RABBITMQ_URL;
-const EXCHANGE_NAME = 'notifications.direct';
-
-async function publishNotification(data) {
-    const connection = await amqp.connect(RABBITMQ_URL);
-    const channel = await connection.createChannel();
-    const routingKey = \`notify.\${data.channel}\`;
-    const message = Buffer.from(JSON.stringify(data));
-
-    channel.publish(
-        EXCHANGE_NAME,
-        routingKey,
-        message,
-        { persistent: true }
-    );
-    await connection.close();
-}`,
-                consumer: `const amqp = require('amqplib');
-const QUEUE_NAME = 'push.queue'; // OR email.queue
-
-async function startConsumer() {
-    const connection = await amqp.connect(process.env.RABBITMQ_URL);
-    const channel = await connection.createChannel();
-    
-    channel.prefetch(1); // QoS
-    await channel.assertQueue(QUEUE_NAME, { durable: true });
-
-    channel.consume(QUEUE_NAME, async (msg) => {
-        if (msg === null) return;
-        const message = JSON.parse(msg.content.toString());
-
-        try {
-            // 1. Idempotency Check
-            // 2. Business Logic (API Calls, Provider Send)
-            
-            // 3. ACK on Success
-            channel.ack(msg);
-        } catch (error) {
-            // 4. REJECT on Failure (triggers retry/DLQ)
-            channel.reject(msg, true);
-            // Implement Circuit Breaker logic here
-        }
-    });
-}
-startConsumer();`,
-                rest: "REST service does not use RabbitMQ. It exposes synchronous GET/POST endpoints consumed by the Gateway or Workers."
-            }
-        };
-        
-        let currentService = 'gateway';
-        let currentLang = 'python';
-
-        function updateServiceDetails(serviceKey) {
-            const service = SERVICES[serviceKey];
-            document.getElementById('detail-name').textContent = service.name;
-            document.getElementById('detail-role').textContent = service.role;
-            document.getElementById('detail-io').innerHTML = `<p><span class="font-medium text-sky-600">Input:</span> ${service.input}</p><p><span class="font-medium text-sky-600">Output:</span> ${service.output}</p>`;
-            
-            const actionsList = document.getElementById('detail-actions');
-            actionsList.innerHTML = service.actions.map(action => `<li>${action}</li>`).join('');
-
-            // Update Code View based on service type
-            const codeTarget = document.getElementById('code-target');
-            const codeIntro = document.getElementById('code-intro');
-            const consumerNote = document.getElementById('consumer-logic-note');
-            
-            if (service.type === 'publisher') {
-                codeTarget.textContent = "Publisher Logic";
-                codeIntro.textContent = "The Gateway must implement this logic to publish the message using the correct exchange and routing keys defined in the contract.";
-                consumerNote.classList.add('hidden');
-            } else if (service.type === 'consumer') {
-                codeTarget.textContent = "Consumer Logic (Worker)";
-                codeIntro.textContent = `The ${service.name} (Team ${serviceKey.toUpperCase().charAt(0)}) must implement this worker logic to reliably consume messages from its specific queue and handle resilience.`;
-                consumerNote.classList.remove('hidden');
-            } else {
-                codeTarget.textContent = "Synchronous REST Service";
-                codeIntro.textContent = "This service primarily exposes synchronous REST endpoints and does not interact with the RabbitMQ message broker.";
-                consumerNote.classList.add('hidden');
-            }
-            
-            // Update code block
-            updateCodeBlock(currentLang, service.type);
-
-            // Update button styling
-            document.querySelectorAll('.service-btn').forEach(btn => {
-                btn.classList.remove('bg-sky-600', 'text-white');
-                btn.classList.add('bg-gray-200', 'text-gray-700');
-                if (btn.dataset.service === serviceKey) {
-                    btn.classList.add('bg-sky-600', 'text-white');
-                    btn.classList.remove('bg-gray-200', 'text-gray-700');
-                }
-            });
-
-            currentService = serviceKey;
-        }
-
-        function updateCodeBlock(lang, type) {
-            let code = "";
-            if (type === 'publisher') {
-                code = CODE_SAMPLES[lang].publisher;
-            } else if (type === 'consumer') {
-                code = CODE_SAMPLES[lang].consumer;
-            } else {
-                code = CODE_SAMPLES[lang].rest;
-            }
-            document.getElementById('code-container').textContent = code;
-        }
-
-        function updateLangButtons(lang) {
-            document.querySelectorAll('.lang-btn').forEach(btn => {
-                btn.classList.remove('bg-sky-600', 'text-white');
-                btn.classList.add('bg-gray-200', 'text-gray-700');
-                if (btn.dataset.lang === lang) {
-                    btn.classList.add('bg-sky-600', 'text-white');
-                    btn.classList.remove('bg-gray-200', 'text-gray-700');
-                }
-            });
-            currentLang = lang;
-        }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            // Initial load
-            updateServiceDetails('gateway');
-            
-            // Event Listeners for Service Selection
-            document.querySelectorAll('.service-btn').forEach(button => {
-                button.addEventListener('click', (e) => {
-                    const serviceKey = e.currentTarget.dataset.service;
-                    updateServiceDetails(serviceKey);
+        // Request permission + generate token
+        async function getToken() {
+            try {
+                const token = await messaging.getToken({
+                    vapidKey: "BI5OuG27GWGS8CmIz9WJpBukqFpiezP2QxcUElndR8IAmz2VntI0smcXo8qCEe6_MuwxYuV7U-nXyVtYtC-Eh5I"
                 });
-            });
 
-            // Event Listeners for Language Selection
-            document.querySelectorAll('.lang-btn').forEach(button => {
-                button.addEventListener('click', (e) => {
-                    const lang = e.currentTarget.dataset.lang;
-                    updateLangButtons(lang);
-                    updateCodeBlock(lang, SERVICES[currentService].type);
-                });
-            });
+                document.getElementById("tokenBox").value = token;
+                console.log("FCM Token:", token);
 
-            // Initial Language styling
-            updateLangButtons('python');
-        });
+            } catch (err) {
+                console.error("Error generating token:", err);
+                alert(err.message);
+            }
+        }
     </script>
+
 </body>
 </html>
