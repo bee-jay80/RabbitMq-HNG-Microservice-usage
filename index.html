@@ -116,36 +116,20 @@
 
     async function generateFCMToken() {
         try {
-            // ✅ Step 1: Check HTTPS
-            if (location.protocol !== "https:") {
-                alert("❌ HTTPS required. FCM only works over secure connections.\nYour URL: " + location.href);
-                console.error("Protocol check failed:", location.protocol);
-                return;
-            }
-
-            // ✅ Step 2: Request notification permission (required on mobile)
-            console.log("Requesting notification permission...");
+            console.log("🔄 Step 1: Requesting notification permission...");
             const permission = await Notification.requestPermission();
-            console.log("Permission status:", permission);
+            console.log("Permission:", permission);
 
             if (permission !== "granted") {
                 alert("⚠️ Notification permission denied. Please enable in browser settings.");
                 return;
             }
 
-            // ✅ Step 3: Check service worker support
-            if (!navigator.serviceWorker) {
-                alert("❌ Service Workers not supported on this browser.");
-                return;
-            }
-
-            // ✅ Step 4: Register service worker
-            console.log("Registering service worker from:", swPath);
-            const registration = await navigator.serviceWorker.register(swPath, { scope: "/" });
+            console.log("🔄 Step 2: Registering service worker...");
+            const registration = await navigator.serviceWorker.register(swPath);
             console.log("✅ Service worker registered:", registration);
 
-            // ✅ Step 5: Get FCM token
-            console.log("Requesting FCM token...");
+            console.log("🔄 Step 3: Getting FCM token...");
             const token = await messaging.getToken({
                 vapidKey: "BI5OuG27GWGS8CmIz9WJpBukqFpiezP2QxcUElndR8IAmz2VntI0smcXo8qCEe6_MuwxYuV7U-nXyVtYtC-Eh5I",
                 serviceWorkerRegistration: registration
@@ -156,14 +140,13 @@
                 console.log("✅ FCM Token generated:", token);
                 alert("✅ Token generated successfully!");
             } else {
-                alert("⚠️ No token received. Check console for details.");
+                alert("⚠️ No token received. Check browser console for details.");
                 console.warn("Token is empty");
             }
 
         } catch (error) {
             console.error("❌ Error:", error);
-            const errorMsg = `Failed to generate token:\n\n${error.code || "Unknown error"}\n${error.message}`;
-            alert(errorMsg);
+            alert("Failed to generate token:\n\n" + error.message);
         }
     }
 </script>
