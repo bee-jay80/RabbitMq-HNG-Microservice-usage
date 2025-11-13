@@ -1,9 +1,10 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Generate FCM Token</title>
+
     <style>
         :root{
             --bg: #f4f7fb;
@@ -11,86 +12,131 @@
             --muted: #6b7280;
             --accent: #2563eb;
             --accent-600: #1e40af;
-            --danger: #ef4444;
             --radius: 10px;
             --max-width: 820px;
-            font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+            font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, Arial;
         }
-        html,body{height:100%;margin:0;background:var(--bg);color:#0f172a}
-        .wrap{min-height:100%;display:flex;align-items:center;justify-content:center;padding:36px 18px}
-        .card{background:var(--card);border-radius:var(--radius);box-shadow:0 6px 20px rgba(2,6,23,0.08);padding:28px;max-width:var(--max-width);width:100%;}
-        .header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px}
-        h2{margin:0;font-size:1.25rem;color:#0b1220}
-        p.lead{margin:0;color:var(--muted);font-size:0.95rem}
-        .controls{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin:16px 0}
-        button{background:var(--accent);color:#fff;border:0;padding:10px 14px;border-radius:8px;font-weight:600;cursor:pointer;box-shadow:0 4px 8px rgba(37,99,235,0.12);transition:background .15s,transform .08s}
-        button:hover{background:var(--accent-600);transform:translateY(-1px)}
-        button:active{transform:translateY(0)}
-        textarea#tokenBox{width:100%;min-height:160px;resize:vertical;padding:12px;border-radius:8px;border:1px solid #e6e9ef;background:#fafbfe;font-family:monospace;color:#0b1220}
-        label{font-weight:600;color:#0b1220}
-        .field-label{margin-bottom:6px;display:block}
-        .meta{margin-top:12px;font-size:0.88rem;color:var(--muted)}
-        .muted{color:var(--muted);font-size:0.9rem}
-        @media (max-width:520px){.card{padding:18px}.controls{flex-direction:column;align-items:stretch}button{width:100%}}
+        html, body {
+            height: 100%;
+            margin: 0;
+            background: var(--bg);
+            color: #0f172a;
+        }
+        .wrap {
+            min-height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 36px 18px;
+        }
+        .card {
+            background: var(--card);
+            border-radius: var(--radius);
+            box-shadow: 0 6px 20px rgba(2, 6, 23, 0.08);
+            padding: 28px;
+            max-width: var(--max-width);
+            width: 100%;
+        }
+        h2 { margin: 0; font-size: 1.25rem; color: #0b1220; }
+        p.lead { margin: 0; color: var(--muted); font-size: 0.95rem; }
+        .controls {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            align-items: center;
+            margin: 16px 0;
+        }
+        button {
+            background: var(--accent);
+            color: #fff;
+            border: 0;
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background .15s, transform .08s;
+        }
+        button:hover { background: var(--accent-600); transform: translateY(-1px); }
+        textarea {
+            width: 100%;
+            min-height: 160px;
+            resize: vertical;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #e6e9ef;
+            background: #fafbfe;
+            font-family: monospace;
+            color: #0b1220;
+        }
+        .meta { margin-top: 12px; font-size: 0.88rem; color: var(--muted); }
     </style>
 </head>
+
 <body>
-    <div class="wrap">
-        <div class="card" role="main">
-            <div class="header">
-                <div>
-                    <h2>Generate Firebase FCM Token</h2>
-                    <p class="lead muted">Click the button to request a device token from Firebase Cloud Messaging.</p>
-                </div>
-            </div>
 
-            <div class="controls">
-                <button onclick="getToken()">Generate Token</button>
-            </div>
+<div class="wrap">
+    <div class="card">
+        <h2>Generate Firebase FCM Token</h2>
+        <p class="lead">Click the button to request a device token from Firebase Cloud Messaging.</p>
 
-            <div>
-                <label class="field-label" for="tokenBox"><strong>FCM Token</strong></label>
-                <textarea id="tokenBox" rows="10" cols="70" placeholder="Your token will appear here..."></textarea>
-                <p class="meta">Tokens are long strings used to identify a client for push messages. Keep them private.</p>
-            </div>
-
-            <div class="meta">Scripts: Firebase compat libraries are preserved for existing logic.</div>
+        <div class="controls">
+            <button onclick="generateFCMToken()">Generate Token</button>
         </div>
+
+        <label for="tokenBox"><strong>FCM Token</strong></label>
+        <textarea id="tokenBox" placeholder="Your token will appear here..."></textarea>
+
+        <p class="meta">Tokens identify a client for push messages. Keep them private.</p>
     </div>
+</div>
 
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging-compat.js"></script>
 
-    <script>
-        // Your Firebase configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyAvu7XOTcoexHqS9o11uTfQRPyMjJE_z8U",
-            authDomain: "push-service-184a8.firebaseapp.com",
-            projectId: "push-service-184a8",
-            storageBucket: "push-service-184a8.firebasestorage.app",
-            messagingSenderId: "1096856520461",
-            appId: "1:1096856520461:web:dd1d3fb6c3ea018e3a5244"
-        };
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging-compat.js"></script>
 
-        // Initialize Firebase
-        firebase.initializeApp(firebaseConfig);
-        const messaging = firebase.messaging();
+<script>
+    // 1️⃣ Your Firebase Config
+    const firebaseConfig = {
+        apiKey: "YOUR_KEY",
+        authDomain: "YOUR_APP.firebaseapp.com",
+        projectId: "YOUR_PROJECT",
+        storageBucket: "YOUR_PROJECT.appspot.com",
+        messagingSenderId: "YOUR_SENDER_ID",
+        appId: "APP_ID"
+    };
 
-        // Request permission + generate token
-        async function getToken() {
-            try {
-                const token = await messaging.getToken({
-                    vapidKey: "BI5OuG27GWGS8CmIz9WJpBukqFpiezP2QxcUElndR8IAmz2VntI0smcXo8qCEe6_MuwxYuV7U-nXyVtYtC-Eh5I"
-                });
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
 
+    const messaging = firebase.messaging();
+
+    // 2️⃣ Register service worker from GitHub Pages
+    const swPath = "/RabbitMq-HNG-Microservice-usage/firebase-messaging-sw.js";
+
+    async function generateFCMToken() {
+        try {
+            const registration = await navigator.serviceWorker.register(swPath);
+            console.log("Service worker registered:", registration);
+
+            const token = await messaging.getToken({
+                vapidKey: "YOUR_VAPID_KEY",
+                serviceWorkerRegistration: registration
+            });
+
+            if (token) {
                 document.getElementById("tokenBox").value = token;
                 console.log("FCM Token:", token);
-
-            } catch (err) {
-                console.error("Error generating token:", err);
-                alert(err.message);
+            } else {
+                alert("No token received. Permission may be blocked.");
             }
+
+        } catch (error) {
+            console.error("Error generating token:", error);
+            alert("Failed to generate token. Check console.");
         }
-    </script>
+    }
+</script>
+
 </body>
 </html>
